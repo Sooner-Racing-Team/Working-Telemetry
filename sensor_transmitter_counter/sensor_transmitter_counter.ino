@@ -46,15 +46,16 @@ int value; // save analog value
 
 // Transceiver Global Variables
 SoftwareSerial HC12(3,2); // HC-12 TX Pin, HC-12 RX Pin
-float counter = 0;
+
 
 /*****************************************************************************************/
-
+int counter = 0;
 void setup() {
  Serial.begin(9600);
+ 
 Serial.print("Void setup has been entered");
 double a_avg_x, milli, temperature_1, temperature_2, temperature_3, temperature_4;
-int counter = 25;
+// int counter = 25;
   
  /* ***********************/
  // ACCELEROMETER SETUP CODE
@@ -95,22 +96,32 @@ int counter = 25;
 
 while (true) {
   Serial.begin(9600);
-  delay(4);
+ delay(4);
   // Serial.print("in da perma loop");
 //a_avg_x = accelerometer(); // run code to collect acceleration data
 
-if (counter == 25) {
+
+
+if (counter == 76) {
+  
   temperature_1 = getTemperature_1(); // run code to collect temperature data
   temperature_2 = getTemperature_2(); 
   temperature_3 = getTemperature_3(); 
   temperature_4 = getTemperature_4(); 
+ 
+
+ // delay(152);
+    
   counter = 0;
 }
 
+  transmit(temperature_1, temperature_2, temperature_3, temperature_4); // run code to send the collected sensor data to the receiving transceiver
+
+
 counter++;
+// HC12.println(counter);
 //milli = potentiometer(); // run code to collect potentiometer data
 
-transmit(temperature_1, temperature_2, temperature_3, temperature_4); // run code to send the collected sensor data to the receiving transceiver
   }
 }
 
@@ -251,18 +262,18 @@ double potentiometer() {
   return (milli);
 }
 
+//Separate everything by commas!!!!
 
 double transmit(double temp1, double temp2, double temp3, double temp4) {
 
 //HC12.println(accel);
-HC12.println(temp1);
+HC12.print(temp1);
 HC12.print(",");
-HC12.println(temp2);
+HC12.print(temp2);
 HC12.print(",");
-HC12.println(temp3);
+HC12.print(temp3);
 HC12.print(",");
 HC12.println(temp4);
-HC12.println(counter);
 
 //HC12.println(millimeters);
 
