@@ -291,7 +291,11 @@ double potentiometer() {
 
 double transmit(double temp1, double temp2, double temp3, double temp4, double a_avg_x, double a_avg_y) {
 
+double 
+key = 999;
 //HC12.println(accel);
+HC12.print(key); // Identifying character for MATLAB code to know which part of our message we started listening
+HC12.print(",");
 HC12.print(temp1);
 HC12.print(",");
 HC12.print(temp2);
@@ -305,7 +309,6 @@ HC12.print(a_avg_x);
 HC12.print(",");
 // HC12.print(", Y g's: ");
 HC12.println(a_avg_y);
-HC12.println("SRT");
 
 
 //HC12.println(millimeters);
