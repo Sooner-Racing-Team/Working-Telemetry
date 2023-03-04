@@ -14,20 +14,20 @@ Adafruit_MPU6050 mpu; // Accelerometer library function needed for variables use
 double a_avg_x = 0;
 double a_avg_y = 0;
 double a_movingAverage = 0;
-double time_total = 0;
+//double time_total = 0;
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ;
 double a_treadmill_x[10] = {0};
 double a_treadmill_y[10] = {0};
 
 // Thermocouple Global Variables
-int thermoDO = 29;
-int thermoCLK = 28;
+const int thermoDO = 29;
+const int thermoCLK = 28;
 
-int thermoCS_1 =  34;
-int thermoCS_2 =  36;
-int thermoCS_3 =  38;
-int thermoCS_4 =  40;
+const int thermoCS_1 =  34;
+const int thermoCS_2 =  36;
+const int thermoCS_3 =  38;
+const int thermoCS_4 =  40;
 
 MAX6675 thermocouple_1(thermoCLK, thermoCS_1, thermoDO);
 MAX6675 thermocouple_2(thermoCLK, thermoCS_2, thermoDO);
@@ -39,6 +39,8 @@ MAX6675 thermocouple_4(thermoCLK, thermoCS_4, thermoDO);
 const int potPin = A3; // pin A0 to read analog input
 int value; // save analog value
 
+const float CALIBRATION_METRIC = 52.0/1023;
+const float CALIBRATION_IMPERIAL = 2.047/1023;
 
 // Transceiver Global Variables
 SoftwareSerial HC12(3,2); // HC-12 TX Pin, HC-12 RX Pin
@@ -106,7 +108,6 @@ double a_avg_x, milli, temperature_1, temperature_2, temperature_3, temperature_
 while (true) {
   Serial.begin(9600);
  delay(4);
-  // Serial.print("in da perma loop");
 a_avg_x = accelerometerX(); // run code to collect acceleration data
 a_avg_y = accelerometerY();
 
@@ -147,10 +148,6 @@ double accelerometerX() {
   Wire.requestFrom(MPU, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
   //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
   AccX = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
-  AccY = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
-  AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
-  Serial.print("Acceleration in x direction: ");
-  Serial.println(AccX);
  
   for (int i = 0; i < 9; i++) {
     a_treadmill_x[i] == a_treadmill_x[i+1];
@@ -165,9 +162,6 @@ double accelerometerX() {
   a_avg_x = a_avg_x / 10;
 
   Serial.print(a_avg_x);
-//  Serial.print('\t'); //needed for plotting multiple variables; must be placed after every variable
-
-
 
   return (a_avg_x);
   
@@ -180,13 +174,7 @@ double accelerometerY() {
   Wire.endTransmission(false);
   Wire.requestFrom(MPU, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
   //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
-  AccX = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
   AccY = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
-  AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
-  Serial.print("Acceleration in x direction: ");
-  Serial.println(AccX);
-//  Serial.print("Acceleration in y direction: ");
- // Serial.println(AccY);
 
  for (int i = 0; i < 9; i++) {
     a_treadmill_y[i] == a_treadmill_y[i+1];
@@ -205,55 +193,33 @@ double accelerometerY() {
 
 double getTemperature_1() {
   float temperature = thermocouple_1.readFahrenheit(); // library command for reading the fahrenheit module
- // Serial.print("Temperature: ");
- // Serial.print(temperature);
-//  Serial.println(F("°C "));   
-//  delay(1000);
   return temperature;
 }
 
 double getTemperature_2() {
   float temperature = thermocouple_2.readFahrenheit(); // library command for reading the fahrenheit module
- // Serial.print("Temperature: ");
- // Serial.print(temperature);
-//  Serial.println(F("°C "));   
-//  delay(1000);
   return temperature;
 }
 
 double getTemperature_3() {
   float temperature = thermocouple_3.readFahrenheit(); // library command for reading the fahrenheit module
- // Serial.print("Temperature: ");
- // Serial.print(temperature);
-//  Serial.println(F("°C "));   
-//  delay(1000);
   return temperature;
 }
 
 double getTemperature_4() {
   float temperature = thermocouple_4.readFahrenheit(); // library command for reading the fahrenheit module
- // Serial.print("Temperature: ");
- // Serial.print(temperature);
-//  Serial.println(F("°C "));   
-//  delay(1000);
   return temperature;
 }
 
 double potentiometer() {
 
-   value = analogRead(potPin);          //Read and save analog value from potentiometer
-  float calibration_metric = 52.0/1023;
-  float calibration_imperial = 2.047/1023;
+  value = analogRead(potPin);          //Read and save analog value from potentiometer
+  
 
-  float inches = calibration_imperial * value;
-  float milli = calibration_metric * value;
-//  Serial.print(inches);
-//  Serial.println(" inches");
-  //Serial.print("Raw value");
- // Serial.println(value);
+  //float inches = calibration_imperial * value;
+  float milli = CALIBRATION_METRIC * value;
   Serial.print(milli);
   Serial.println(" millimeters");
-  // Serial.println(value);
   delay(100);                          //Small delay
   
   return (milli);
