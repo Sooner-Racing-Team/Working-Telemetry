@@ -21,13 +21,6 @@ double a_treadmill_x[10] = {0};
 double a_treadmill_y[10] = {0};
 
 // Thermocouple Global Variables
-/*
-int SO = 2; // has to be digital pin (changed from the original thermocouple code where the pins were digital PWM, troubleshoot this if thermocouple doesn't work
-int CS = 3; // digital pin
-int sck = 4; // digital pin
-MAX6675 module(sck, CS, SO);
-*/
-
 int thermoDO = 29;
 int thermoCLK = 28;
 
@@ -54,7 +47,7 @@ SoftwareSerial HC12(3,2); // HC-12 TX Pin, HC-12 RX Pin
 /*****************************************************************************************/
 int counter = 0;
 void setup() {
- Serial.begin(9600);
+Serial.begin(9600);
  
 Serial.print("Void setup has been entered");
 double a_avg_x, milli, temperature_1, temperature_2, temperature_3, temperature_4;
@@ -146,7 +139,7 @@ void loop() {
 Serial.print("stuck in void loop");
 }
 
- double accelerometerX() {
+double accelerometerX() {
   // === Read acceleromter data === //
   Wire.beginTransmission(MPU);
   Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
@@ -158,8 +151,6 @@ Serial.print("stuck in void loop");
   AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
   Serial.print("Acceleration in x direction: ");
   Serial.println(AccX);
-//  Serial.print("Acceleration in y direction: ");
- // Serial.println(AccY);
  
   for (int i = 0; i < 9; i++) {
     a_treadmill_x[i] == a_treadmill_x[i+1];
@@ -171,22 +162,8 @@ Serial.print("stuck in void loop");
     a_avg_x += a_treadmill_x[i];
   }
 
- /*  a_treadmill_y[0] = a_treadmill_y[1];
-  a_treadmill_y[1] = a_treadmill_y[2];
-  a_treadmill_y[2] = a_treadmill_y[3];
-  a_treadmill_y[3] = a_treadmill_y[4];
-  a_treadmill_y[4] = a_treadmill_y[5];
-  a_treadmill_y[5] = a_treadmill_y[6];
-  a_treadmill_y[6] = a_treadmill_y[7];
-  a_treadmill_y[7] = a_treadmill_y[8];
-  a_treadmill_y[8] = a_treadmill_y[9];
-  a_treadmill_y[9] = AccY;
+  a_avg_x = a_avg_x / 10;
 
-  a_avg_y = (a_treadmill_y[0] + a_treadmill_y[1] + a_treadmill_y[2] + a_treadmill_y[3] + a_treadmill_y[4] + a_treadmill_y[5] + a_treadmill_y[6] + a_treadmill_y[7] + a_treadmill_y[8] + a_treadmill_y[9]) / 10;
-  
-  */
-  
-  //Serial.print("Moving average: ");
   Serial.print(a_avg_x);
 //  Serial.print('\t'); //needed for plotting multiple variables; must be placed after every variable
 
@@ -211,18 +188,17 @@ double accelerometerY() {
 //  Serial.print("Acceleration in y direction: ");
  // Serial.println(AccY);
 
- a_treadmill_y[0] = a_treadmill_y[1];
-  a_treadmill_y[1] = a_treadmill_y[2];
-  a_treadmill_y[2] = a_treadmill_y[3];
-  a_treadmill_y[3] = a_treadmill_y[4];
-  a_treadmill_y[4] = a_treadmill_y[5];
-  a_treadmill_y[5] = a_treadmill_y[6];
-  a_treadmill_y[6] = a_treadmill_y[7];
-  a_treadmill_y[7] = a_treadmill_y[8];
-  a_treadmill_y[8] = a_treadmill_y[9];
+ for (int i = 0; i < 9; i++) {
+    a_treadmill_y[i] == a_treadmill_y[i+1];
+  }
   a_treadmill_y[9] = AccY;
 
-  a_avg_y = (a_treadmill_y[0] + a_treadmill_y[1] + a_treadmill_y[2] + a_treadmill_y[3] + a_treadmill_y[4] + a_treadmill_y[5] + a_treadmill_y[6] + a_treadmill_y[7] + a_treadmill_y[8] + a_treadmill_y[9]) / 10;
+
+  for (int i = 0; i <= 9; i++) {
+    a_avg_y += a_treadmill_y[i];
+  }
+
+  a_avg_y = a_avg_y / 10;
 
   return (a_avg_y);
 }
