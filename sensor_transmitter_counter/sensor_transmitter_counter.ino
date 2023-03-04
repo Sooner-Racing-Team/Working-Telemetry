@@ -161,19 +161,15 @@ Serial.print("stuck in void loop");
 //  Serial.print("Acceleration in y direction: ");
  // Serial.println(AccY);
  
-  
-  a_treadmill_x[0] = a_treadmill_x[1];
-  a_treadmill_x[1] = a_treadmill_x[2];
-  a_treadmill_x[2] = a_treadmill_x[3];
-  a_treadmill_x[3] = a_treadmill_x[4];
-  a_treadmill_x[4] = a_treadmill_x[5];
-  a_treadmill_x[5] = a_treadmill_x[6];
-  a_treadmill_x[6] = a_treadmill_x[7];
-  a_treadmill_x[7] = a_treadmill_x[8];
-  a_treadmill_x[8] = a_treadmill_x[9];
+  for (int i = 0; i < 9; i++) {
+    a_treadmill_x[i] == a_treadmill_x[i+1];
+  }
   a_treadmill_x[9] = AccX;
 
-  a_avg_x = (a_treadmill_x[0] + a_treadmill_x[1] + a_treadmill_x[2] + a_treadmill_x[3] + a_treadmill_x[4] + a_treadmill_x[5] + a_treadmill_x[6] + a_treadmill_x[7] + a_treadmill_x[8] + a_treadmill_x[9]) / 10;
+
+  for (int i = 0; i <= 9; i++) {
+    a_avg_x += a_treadmill_x[i];
+  }
 
  /*  a_treadmill_y[0] = a_treadmill_y[1];
   a_treadmill_y[1] = a_treadmill_y[2];
