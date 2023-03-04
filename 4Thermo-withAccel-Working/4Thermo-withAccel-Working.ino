@@ -116,7 +116,7 @@ while (true) {
   // Serial.print("in da perma loop");
 a_avg_x = accelerometerX(); // run code to collect acceleration data
 a_avg_y = accelerometerY();
-
+unsigned long time = millis();
 
 
 if (counter == 38) {
@@ -132,7 +132,7 @@ if (counter == 38) {
   counter = 0;
 }
 
-  transmit(temperature_1, temperature_2, temperature_3, temperature_4, a_avg_x, a_avg_y); // run code to send the collected sensor data to the receiving transceiver
+  transmit(temperature_1, temperature_2, temperature_3, temperature_4, a_avg_x, a_avg_y, time); // run code to send the collected sensor data to the receiving transceiver
 
 
 counter++;
@@ -289,10 +289,9 @@ double potentiometer() {
 
 //Separate everything by commas!!!!
 
-double transmit(double temp1, double temp2, double temp3, double temp4, double a_avg_x, double a_avg_y) {
+double transmit(double temp1, double temp2, double temp3, double temp4, double a_avg_x, double a_avg_y, unsigned long time) {
 
-double 
-key = 999;
+double key = 999;
 //HC12.println(accel);
 HC12.print(key); // Identifying character for MATLAB code to know which part of our message we started listening
 HC12.print(",");
@@ -308,7 +307,9 @@ HC12.print(",");
 HC12.print(a_avg_x);
 HC12.print(",");
 // HC12.print(", Y g's: ");
-HC12.println(a_avg_y);
+HC12.print(a_avg_y);
+HC12.print(",");
+HC12.println(time);
 
 
 //HC12.println(millimeters);
