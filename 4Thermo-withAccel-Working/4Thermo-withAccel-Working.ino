@@ -299,11 +299,13 @@ HC12.print(",");
 HC12.print(temp3);
 HC12.print(",");
 HC12.print(temp4);
-HC12.print(", X g's: ");
+HC12.print(",");
+// HC12.print(", X g's: ");
 HC12.print(a_avg_x);
-HC12.print(", Y g's: ");
+HC12.print(",");
+// HC12.print(", Y g's: ");
 HC12.println(a_avg_y);
-
+HC12.println("SRT");
 
 
 //HC12.println(millimeters);
