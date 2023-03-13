@@ -38,7 +38,7 @@ struct Hardware {
         MAX6675(thermo_CLK, thermo_CS[2], thermo_DO),
         MAX6675(thermo_CLK, thermo_CS[3], thermo_DO),
     };
-    SoftwareSerial HC12(int, int);
+    SoftwareSerial HC12 = SoftwareSerial(tran_rx_pin, tran_tx_pin);
 };
 
 Hardware hardware;
@@ -82,7 +82,7 @@ void setup() {
     hardware.mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
     // Start connection to getter
-    hardware.HC12(tran_rx_pin, tran_tx_pin).begin(9600);
+    hardware.HC12.begin(9600);
     time = millis(); // todo: add to loop since it's just the board's uptime
 }
 
