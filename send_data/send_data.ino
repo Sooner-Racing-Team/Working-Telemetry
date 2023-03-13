@@ -11,7 +11,7 @@
 // (change these if necessary)
 
 // Version information
-const String sender_version = "0.0.0"; // replaces old "transmit key"
+const char sender_version[] = "0.0.0"; // replaces old "transmit key"
 const int protocol_version = 0;        // increase when making breaking changes
 
 // Thermocouple
@@ -24,8 +24,8 @@ const int pot_pin = A3; // pin A0 to read analog input
 int pot_value;          // save analog value
 
 // Transceiver
-int tran_tx_pin = 3;
-int tran_rx_pin = 2;
+int transceiver_tx_pin = 3;
+int transceiver_rx_pin = 2;
 
 //////////////////////
 // Initialize hardware
@@ -38,7 +38,8 @@ struct Hardware {
         MAX6675(thermo_CLK, thermo_CS[2], thermo_DO),
         MAX6675(thermo_CLK, thermo_CS[3], thermo_DO),
     };
-    SoftwareSerial HC12 = SoftwareSerial(tran_rx_pin, tran_tx_pin);
+    SoftwareSerial HC12 =
+        SoftwareSerial(transceiver_rx_pin, transceiver_tx_pin);
 };
 
 Hardware hardware;
@@ -127,10 +128,10 @@ double getTemperature(int thermocouple_index) {
 }
 
 /**
- * Returns potentiometer's postional information.
- * 
+ * UNIMPLEMENTED: Returns potentiometer's postional information.
+ *
  * TODO: make this work when we get potentiometer info
-*/
+ */
 double getPosition() {
     return 0.0; // TODO
 }
@@ -143,12 +144,47 @@ boolean shiftArray() {
 }
 
 /**
+ * Uses a generic to print out a given value with a comma.
+ */
+template <typename T> void HC12_comma_print(T info) {
+    hardware.HC12.print(info);
+    hardware.HC12.print(",");
+}
+
+/**
  * Sends the collected data to the receiver.
  *
  * Returns bool representing whether it actually sent data or not.
  */
 boolean transmit() {
-    return true; // TODO
+    if (hardware.HC12.isListening()) {
+        // flush remaining data
+        hardware.HC12.flush();
+
+        // version info
+        HC12_comma_print(sender_version);
+
+        // temperature data
+        HC12_comma_print("REPLACE_ME: temp_sensor_1_data");
+        HC12_comma_print("REPLACE_ME: temp_sensor_2_data");
+        HC12_comma_print("REPLACE_ME: temp_sensor_3_data");
+        HC12_comma_print("REPLACE_ME: temp_sensor_4_data");
+
+        // acceleration data
+        HC12_comma_print(acceleration.average_x);
+        HC12_comma_print(acceleration.average_y);
+        // HC12_comma_print(acceleration.average_z);
+
+        // potentiometer data
+        // (nothing here yet)
+
+        // time data
+        hardware.HC12.print(time);
+        hardware.HC12.println();
+
+        return true;
+    }
+    return false; // TODO
 }
 
 // Generally shouldn't activate...
