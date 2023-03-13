@@ -127,6 +127,15 @@ double getTemperature(int thermocouple_index) {
 }
 
 /**
+ * Returns potentiometer's postional information.
+ * 
+ * TODO: make this work when we get potentiometer info
+*/
+double getPosition() {
+    return 0.0; // TODO
+}
+
+/**
  * Shifts the given array.
  */
 boolean shiftArray() {
