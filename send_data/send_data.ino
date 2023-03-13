@@ -75,6 +75,11 @@ PotentiometerData position;
 // Track time
 unsigned long time;
 
+/**
+ * Entry point for Arduino.
+ * 
+ * Begins the process of collecting and running code.
+*/
 void setup() {
     // Final bits of setup
     // Accelerometer
@@ -90,7 +95,7 @@ void setup() {
 /**
  * Returns newest acceleration number from given direction in m/s^2.
  *
- *
+ * Treat -1234.0 as an error state!
  */
 double getAcceleration(Direction direction) {
     sensors_event_t *accel, *_gyro, *_temp;
@@ -107,7 +112,7 @@ double getAcceleration(Direction direction) {
         return accel->acceleration.z;
         break;
     default:
-        return 0.0;
+        return -1234.0;
     }
 }
 
@@ -131,13 +136,17 @@ double getTemperature(int thermocouple_index) {
  * UNIMPLEMENTED: Returns potentiometer's postional information.
  *
  * TODO: make this work when we get potentiometer info
+ * 
+ * Treat -1234.0 as an error state!
  */
 double getPosition() {
-    return 0.0; // TODO
+    return -1234.0; // TODO
 }
 
 /**
  * Uses a generic to print out a given value with a comma.
+ * 
+ * For use in transmit().
  */
 template <typename T> void HC12_comma_print(T info) {
     hardware.HC12.print(info);
@@ -151,8 +160,10 @@ template <typename T> void HC12_comma_print(T info) {
  */
 boolean transmit() {
     if (hardware.HC12.isListening()) {
-        // flush remaining data
-        hardware.HC12.flush();
+        // when necessary, flush remaining data
+        if (hardware.HC12.available() != 0) {
+            hardware.HC12.flush();
+        }
 
         // version info
         HC12_comma_print(sender_version);
@@ -180,7 +191,11 @@ boolean transmit() {
     return false; // TODO
 }
 
-// Generally shouldn't activate...
+/**
+ * Required loop() function in Arduino.
+ * 
+ * Generally shouldn't activate.
+*/
 void loop() {
     Serial.print("Loop function accessed. Please restart the sender.");
     delay(2000);
