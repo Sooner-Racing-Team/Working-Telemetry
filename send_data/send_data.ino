@@ -66,8 +66,8 @@ AccelerationData acceleration;
 // Potentiometer Data Struct
 // Collections position information for stability data
 struct PotentiometerData {
-    double millimeters;
-    double inches;
+    double millimeters = 0.0;
+    double inches = 0.0;
 };
 
 PotentiometerData position;
