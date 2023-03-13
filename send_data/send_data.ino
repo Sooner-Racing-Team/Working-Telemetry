@@ -137,13 +137,6 @@ double getPosition() {
 }
 
 /**
- * Shifts the given array.
- */
-boolean shiftArray() {
-    // TODO
-}
-
-/**
  * Uses a generic to print out a given value with a comma.
  */
 template <typename T> void HC12_comma_print(T info) {
