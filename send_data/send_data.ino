@@ -10,6 +10,10 @@
 // Hardcoded hardware setup values
 // (change these if necessary)
 
+// Version information
+const String sender_version = "0.0.0"; // replaces old "transmit key"
+const int protocol_version = 0;        // increase when making breaking changes
+
 // Thermocouple
 int thermo_DO = 29;                  // data output pin
 int thermo_CLK = 28;                 // clock pin
@@ -59,10 +63,13 @@ struct AccelerationData {
 AccelerationData acceleration;
 
 // Potentiometer Data Struct
+// Collections position information for stability data
 struct PotentiometerData {
     double millimeters;
     double inches;
 };
+
+PotentiometerData position;
 
 // Track time
 unsigned long time;
@@ -72,14 +79,18 @@ void setup() {
     // Accelerometer
     hardware.mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     hardware.mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    hardware.mpu.setFilterBandwidth(MPU6050_BAND_21_HZ); 
+    hardware.mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
     // Start connection to getter
     hardware.HC12(tran_rx_pin, tran_tx_pin).begin(9600);
     time = millis(); // todo: add to loop since it's just the board's uptime
 }
 
-// Totals and averages the ten recent measurements for acceleration
+/**
+ * Returns newest acceleration number from given direction in m/s^2.
+ *
+ *
+ */
 double getAcceleration(Direction direction) {
     sensors_event_t *accel, *_gyro, *_temp;
     hardware.mpu.getEvent(accel, _gyro, _temp);
@@ -99,10 +110,6 @@ double getAcceleration(Direction direction) {
     }
 }
 
-boolean shiftArray() {
-    // TODO
-}
-
 /**
  * Returns temperature data from the selected thermocouple in Fahrenheit.
  *
@@ -117,6 +124,13 @@ double getTemperature(int thermocouple_index) {
     }
 
     return 0.0;
+}
+
+/**
+ * Shifts the given array.
+ */
+boolean shiftArray() {
+    // TODO
 }
 
 /**
