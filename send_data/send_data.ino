@@ -92,7 +92,21 @@ void setup() {
 
     // Main telemetry loop
     while (true) {
+        // set beginning time
         time = millis();
+
+        // Get acceleration average
+        fillAcceleration(x);
+        fillAcceleration(y);
+        fillAcceleration(z);
+
+        // Get temperature average
+
+        // Get position average
+        // UNIMPLEMENTED
+
+        // attempt transmission
+        transmit();
     }
 }
 
@@ -116,7 +130,38 @@ double getAcceleration(Direction direction) {
         return accel->acceleration.z;
         break;
     default:
+        Serial.println("Invalid parameter passed to getAcceleration...");
         return -1234.0;
+    }
+}
+
+/**
+ * UNFINISHED: Gets 10 acceleration values, then sets acceleration.average_x/y/z
+ * accordingly.
+ * 
+ * Should clean up used array when done. 
+ */
+void fillAcceleration(Direction direction) {
+    double* values;
+
+    // from direction parameter, pick the array to edit
+    switch (direction) {
+        case x:
+            values = acceleration.values_x;
+            break;
+        case y:
+            values = acceleration.values_y;
+            break;
+        case z:
+            values = acceleration.values_z;
+            break;
+        default:
+            Serial.println("Invalid parameter passed to fillAcceleration...");
+            return;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        values[i] = getAcceleration(direction);
     }
 }
 
@@ -192,6 +237,7 @@ boolean transmit() {
 
         return true;
     }
+    Serial.println("HC12 is not able to receieve data. transmit() failure!");
     return false; // TODO
 }
 
