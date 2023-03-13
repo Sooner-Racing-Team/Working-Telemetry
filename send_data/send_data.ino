@@ -117,14 +117,14 @@ double getAcceleration(Direction direction) {
  * Each sensor updates only once every 250 milliseconds.
  * Calling this function any more than that will result in duplicate values.
  *
- * Treat 0.0 as an error state!
+ * Treat -1234.0 as an error state!
  */
 double getTemperature(int thermocouple_index) {
     if (thermocouple_index >= 0 && thermocouple_index < 4) {
         return hardware.thermocouples[thermocouple_index].readFahrenheit();
     }
 
-    return 0.0;
+    return -1234.0;
 }
 
 /**
