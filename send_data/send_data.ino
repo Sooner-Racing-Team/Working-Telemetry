@@ -64,13 +64,21 @@ struct AccelerationData {
 AccelerationData acceleration;
 
 // Potentiometer Data Struct
-// Collections position information for stability data
+// Collects position information for stability data
 struct PotentiometerData {
     double millimeters = 0.0;
     double inches = 0.0;
 };
 
 PotentiometerData position;
+
+// Temperature Data Struct
+// Collects temperature information from thermocouples
+struct TemperatureData {
+    double temperatures_in_fahrenheit[4] = {0.0};
+};
+
+TemperatureData temperature;
 
 // Track time
 unsigned long time;
@@ -92,15 +100,21 @@ void setup() {
 
     // Main telemetry loop
     while (true) {
-        // set beginning time
-        time = millis();
-
         // Get acceleration average
-        fillAcceleration(x);
-        fillAcceleration(y);
-        fillAcceleration(z);
+        fill_acceleration(x);
+        fill_acceleration(y);
+        fill_acceleration(z);
 
-        // Get temperature average
+        if (!check_acceleration_average_valid()) {
+            continue;
+        }
+
+        // Get temperatures
+        fill_temperature();
+
+        if (!check_temperatures_valid()) {
+            continue;
+        }
 
         // Get position average
         // UNIMPLEMENTED
@@ -115,7 +129,7 @@ void setup() {
  *
  * Treat -1234.0 as an error state!
  */
-double getAcceleration(Direction direction) {
+double get_acceleration(Direction direction) {
     sensors_event_t *accel, *_gyro, *_temp;
     hardware.mpu.getEvent(accel, _gyro, _temp);
 
@@ -136,33 +150,49 @@ double getAcceleration(Direction direction) {
 }
 
 /**
- * UNFINISHED: Gets 10 acceleration values, then sets acceleration.average_x/y/z
+ * Gets 10 acceleration values, then sets acceleration.average_x/y/z
  * accordingly.
- * 
- * Should clean up used array when done. 
  */
-void fillAcceleration(Direction direction) {
-    double* values;
+void fill_acceleration(Direction direction) {
+    double *values;
 
     // from direction parameter, pick the array to edit
     switch (direction) {
-        case x:
-            values = acceleration.values_x;
-            break;
-        case y:
-            values = acceleration.values_y;
-            break;
-        case z:
-            values = acceleration.values_z;
-            break;
-        default:
-            Serial.println("Invalid parameter passed to fillAcceleration...");
-            return;
+    case x:
+        values = acceleration.values_x;
+        break;
+    case y:
+        values = acceleration.values_y;
+        break;
+    case z:
+        values = acceleration.values_z;
+        break;
+    default:
+        Serial.println("Invalid parameter passed to fillAcceleration...");
+        return;
     }
 
     for (int i = 0; i < 10; i++) {
-        values[i] = getAcceleration(direction);
+        values[i] = get_acceleration(direction);
     }
+}
+
+/**
+ * Checks the validitity of a given acceleration direction's current average.
+ *
+ * In other words, this functions looks for "-1234.0" and gets upset if it finds
+ * anything... :)
+ */
+bool check_acceleration_average_valid() {
+    double accel_averages[3] = {acceleration.average_x, acceleration.average_y,
+                                acceleration.average_z};
+    for (double average : accel_averages) {
+        if (average + 0.01 >= -1234 && average - 0.01 <= -1234) {
+            Serial.println("An accel average was not properly initialized.");
+            return false;
+        }
+    }
+    return true;
 }
 
 /**
@@ -173,7 +203,7 @@ void fillAcceleration(Direction direction) {
  *
  * Treat -1234.0 as an error state!
  */
-double getTemperature(int thermocouple_index) {
+double get_temperature(int thermocouple_index) {
     if (thermocouple_index >= 0 && thermocouple_index < 4) {
         return hardware.thermocouples[thermocouple_index].readFahrenheit();
     }
@@ -182,15 +212,35 @@ double getTemperature(int thermocouple_index) {
 }
 
 /**
- * UNIMPLEMENTED: Returns potentiometer's postional information.
+ * Sets each temperature value to the sensor's reading.
+ */
+void fill_temperature() {
+    for (int i = 0; i < 4; i++) {
+        temperature.temperatures_in_fahrenheit[i] = get_temperature(i);
+    }
+}
+
+/**
+ * Checks to see if any temperature value is invalid.
+ */
+bool check_temperatures_valid() {
+    for (double temp : temperature.temperatures_in_fahrenheit) {
+        if (temp + 0.01 >= -1234 && temp - 0.01 <= -1234) {
+            Serial.println("A temp average was not properly initialized.");
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * UNIMPLEMENTED: Returns potentiometer's average postional value.
  *
  * TODO: make this work when we get potentiometer info
  *
  * Treat -1234.0 as an error state!
  */
-double getPosition() {
-    return -1234.0; // TODO
-}
+double get_position() { return -1234.0; }
 
 /**
  * Uses a generic to print out a given value with a comma.
@@ -207,7 +257,7 @@ template <typename T> void HC12_comma_print(T info) {
  *
  * Returns bool representing whether it actually sent data or not.
  */
-boolean transmit() {
+bool transmit() {
     if (hardware.HC12.isListening()) {
         // when necessary, flush remaining data
         if (hardware.HC12.available() != 0) {
@@ -218,10 +268,9 @@ boolean transmit() {
         HC12_comma_print(sender_version);
 
         // temperature data
-        HC12_comma_print("REPLACE_ME: temp_sensor_1_data");
-        HC12_comma_print("REPLACE_ME: temp_sensor_2_data");
-        HC12_comma_print("REPLACE_ME: temp_sensor_3_data");
-        HC12_comma_print("REPLACE_ME: temp_sensor_4_data");
+        for (double temp : temperature.temperatures_in_fahrenheit) {
+            HC12_comma_print(temp);
+        }
 
         // acceleration data
         HC12_comma_print(acceleration.average_x);
@@ -232,13 +281,13 @@ boolean transmit() {
         // (nothing here yet)
 
         // time data
-        hardware.HC12.print(time);
+        hardware.HC12.print(millis());
         hardware.HC12.println();
 
         return true;
     }
     Serial.println("HC12 is not able to receieve data. transmit() failure!");
-    return false; // TODO
+    return false;
 }
 
 /**
