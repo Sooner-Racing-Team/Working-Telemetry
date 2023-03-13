@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/barrett/Arduino/libraries/**",
+                "/home/barrett/Downloads/arduino-1.8.19-linuxaarch64/arduino-1.8.19/**"
+            ],
+            "defines": [
+                "UBRRH"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-arm64"
+        }
+    ],
+    "version": 4
+}
