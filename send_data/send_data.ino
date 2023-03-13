@@ -77,9 +77,9 @@ unsigned long time;
 
 /**
  * Entry point for Arduino.
- * 
+ *
  * Begins the process of collecting and running code.
-*/
+ */
 void setup() {
     // Final bits of setup
     // Accelerometer
@@ -89,7 +89,11 @@ void setup() {
 
     // Start connection to getter
     hardware.HC12.begin(9600);
-    time = millis(); // todo: add to loop since it's just the board's uptime
+
+    // Main telemetry loop
+    while (true) {
+        time = millis();
+    }
 }
 
 /**
@@ -136,7 +140,7 @@ double getTemperature(int thermocouple_index) {
  * UNIMPLEMENTED: Returns potentiometer's postional information.
  *
  * TODO: make this work when we get potentiometer info
- * 
+ *
  * Treat -1234.0 as an error state!
  */
 double getPosition() {
@@ -145,7 +149,7 @@ double getPosition() {
 
 /**
  * Uses a generic to print out a given value with a comma.
- * 
+ *
  * For use in transmit().
  */
 template <typename T> void HC12_comma_print(T info) {
@@ -193,9 +197,9 @@ boolean transmit() {
 
 /**
  * Required loop() function in Arduino.
- * 
+ *
  * Generally shouldn't activate.
-*/
+ */
 void loop() {
     Serial.print("Loop function accessed. Please restart the sender.");
     delay(2000);
