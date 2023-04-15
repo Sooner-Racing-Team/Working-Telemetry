@@ -42,7 +42,7 @@ struct Hardware {
         MAX6675(thermo_CLK, thermo_CS[3], thermo_DO),
     };
     SoftwareSerial HC12 =
-        SoftwareSerial(transceiver_rx_pin, transceiver_tx_pin);
+        SoftwareSerial(transceiver_tx_pin, transceiver_rx_pin);
 };
 
 Hardware hardware;
@@ -283,37 +283,34 @@ template <typename T> void HC12_comma_print(T info) {
  * Returns bool representing whether it actually sent data or not.
  */
 bool transmit() {
-    if (hardware.HC12.isListening()) {
-        // when necessary, flush remaining data
-        if (hardware.HC12.available() != 0) {
-            hardware.HC12.flush();
-        }
-
-        // version info
-        HC12_comma_print(sender_version);
-
-        // temperature data
-        for (double temp : temperature.temperatures_in_fahrenheit) {
-            HC12_comma_print(temp);
-        }
-
-        // acceleration data
-        HC12_comma_print(acceleration.average_x);
-        HC12_comma_print(acceleration.average_y);
-        // HC12_comma_print(acceleration.average_z);
-
-        // potentiometer data
-        // (nothing here yet)
-
-        // time data
-        hardware.HC12.print(millis());
-        hardware.HC12.println();
-
-        return true;
+    // when necessary, flush remaining data
+    if (hardware.HC12.available() != 0) {
+        hardware.HC12.flush();
     }
-    Serial.println("HC12 is not able to receieve data. transmit() failure!");
-    return false;
+
+    // version info
+    HC12_comma_print(sender_version);
+
+    // temperature data
+    for (double temp : temperature.temperatures_in_fahrenheit) {
+        HC12_comma_print(temp);
+    }
+
+    // acceleration data
+    HC12_comma_print(acceleration.average_x);
+    HC12_comma_print(acceleration.average_y);
+    // HC12_comma_print(acceleration.average_z);
+
+    // potentiometer data
+    // (nothing here yet)
+
+    // time data
+    hardware.HC12.print(millis());
+    hardware.HC12.println();
+
+    return true;
 }
+
 
 /**
  * Required loop() function in Arduino.
