@@ -4,6 +4,7 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <math.h>
+#include <Arduino.h>
 
 //////////////////////////////////
 // Hardcoded hardware setup values
@@ -25,6 +26,9 @@ int pot_value;          // save analog value
 // Transceiver
 int transceiver_tx_pin = 3;
 int transceiver_rx_pin = 2;
+
+// Data delay
+int delay_in_ms = 100;
 
 //////////////////////
 // Initialize hardware
@@ -88,14 +92,20 @@ unsigned long time;
  * Begins the process of collecting and running code.
  */
 void setup() {
+    Serial.println("send_data");
+    Serial.begin(9600); 
+    delay(1000); // give it some setup time. feel free to remove
+  
     // Final bits of setup
     // Accelerometer
     hardware.mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     hardware.mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     hardware.mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+    Serial.println("hardware mpu setup complete");
 
     // Start connection to getter
     hardware.HC12.begin(9600);
+    delay(1000); // give it some setup time. feel free to remove
 
     // Main telemetry loop
     while (true) {
@@ -103,15 +113,19 @@ void setup() {
         fill_acceleration(x);
         fill_acceleration(y);
         fill_acceleration(z);
+        Serial.println("filled acceleration");
 
         if (!check_acceleration_average_valid()) {
+            Serial.println("acceleration average was invalid!");
             continue;
         }
 
         // Get temperatures
         fill_temperature();
+        Serial.println("filled temperatures");
 
         if (!check_temperatures_valid()) {
+            Serial.println("temperatures were invalid!");
             continue;
         }
 
@@ -120,6 +134,9 @@ void setup() {
 
         // attempt transmission
         transmit();
+        Serial.println("transmission attempted!");
+
+        delay(100);
     }
 }
 
@@ -129,18 +146,18 @@ void setup() {
  * Treat -1234.0 as an error state!
  */
 double get_acceleration(Direction direction) {
-    sensors_event_t *accel, *_gyro, *_temp;
-    hardware.mpu.getEvent(accel, _gyro, _temp);
+    sensors_event_t accel, _gyro, _temp;
+    hardware.mpu.getEvent(&accel, &_gyro, &_temp);
 
     switch (direction) {
     case x:
-        return accel->acceleration.x;
+        return accel.acceleration.x;
         break;
     case y:
-        return accel->acceleration.y;
+        return accel.acceleration.y;
         break;
     case z:
-        return accel->acceleration.z;
+        return accel.acceleration.z;
         break;
     default:
         Serial.println("Invalid parameter passed to getAcceleration...");
@@ -154,27 +171,36 @@ double get_acceleration(Direction direction) {
  */
 void fill_acceleration(Direction direction) {
     double *values;
+    double *average;
 
     // from direction parameter, pick the array to edit
     switch (direction) {
-    case x:
-        values = acceleration.values_x;
-        break;
-    case y:
-        values = acceleration.values_y;
-        break;
-    case z:
-        values = acceleration.values_z;
-        break;
-    default:
-        Serial.println("Invalid parameter passed to fillAcceleration...");
-        return;
+        case x:
+            values = acceleration.values_x;
+            average = &acceleration.average_x;
+            break;
+        case y:
+            values = acceleration.values_y;
+            average = &acceleration.average_y;
+            break;
+        case z:
+            values = acceleration.values_z;
+            average = &acceleration.average_z;
+            break;
+        default:
+            Serial.println("Invalid parameter passed to fillAcceleration...");
+            return;
     }
 
+    double sum = 0.0;
     for (int i = 0; i < 10; i++) {
         values[i] = get_acceleration(direction);
+        sum += values[i];
     }
+
+    *average = sum / 10.0;
 }
+
 
 /**
  * Checks the validitity of a given acceleration direction's current average.
